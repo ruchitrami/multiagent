@@ -19,10 +19,12 @@ import projectParams
 import textDisplay
 import graphicsDisplay
 import random
+import time
 random.seed(0)
 
 # register arguments and set default values
 def readCommand(argv):
+    time.sleep(10)
     parser = optparse.OptionParser(description = 'Run public tests on student code')
     parser.set_defaults(generateSolutions=False, edxOutput=False, muteOutput=False, printTestCase=False, noGraphics=False, graphics=False)
     parser.add_option('--test-directory',
