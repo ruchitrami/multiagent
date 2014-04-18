@@ -208,10 +208,13 @@ class MinimaxAgent(MultiAgentSearchAgent):
         if(len(lstActions)==0):
             return self.evaluationFunction(gameState)
         finalAction = lstActions[0]
+        depth = 0
+        #if(gameState.getNumAgents()==2 and self.depth==1):
+        #    depth = 1
         for action in lstActions:
             successor = gameState.generateSuccessor(agentIndex, action)
             #for successor in lstSuccessors:
-            val = self.getMinimaxValue(successor, agentIndex+1, 0)
+            val = self.minValue(successor, agentIndex+1, depth)
             if(val > maxVal):
                maxVal = val
                finalAction = action
@@ -224,9 +227,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
         #if(len(lstActions)==0):
         #    return self.evaluationFunction(gameState)            
         if ( gameState.isLose() or gameState.isWin()):
-                return self.evaluationFunction( gameState )
+            return self.evaluationFunction( gameState )
         if(currentDepth==self.depth and agentIndex==(gameState.getNumAgents()-1)):
-                return self.evaluationFunction(gameState)
+            return self.evaluationFunction(gameState)
         if(agentIndex==0):
             return self.maxValue(gameState, currentDepth, agentIndex)
         else:
@@ -237,12 +240,16 @@ class MinimaxAgent(MultiAgentSearchAgent):
         #maxData = collections.namedtuple('MaxAction','Value,Action')
         val = -99999
         if ( gameState.isLose() or gameState.isWin()):
-                return self.evaluationFunction( gameState )
+            return self.evaluationFunction( gameState )
+        if(currentDepth>self.depth ):
+            return self.evaluationFunction(gameState)
         lstActions = gameState.getLegalActions(agentIndex)
         for action in lstActions:
             successor = gameState.generateSuccessor(agentIndex, action)
+            if ( gameState.isLose() or gameState.isWin()):
+                return self.evaluationFunction( gameState )
             #for successor in lstSuccessors:
-            miniMaxValue = self.getMinimaxValue(successor, (agentIndex+1), currentDepth)
+            miniMaxValue = self.minValue(successor, (agentIndex+1), currentDepth)
             val = max(val, miniMaxValue)
             returnVal = val
         return returnVal
@@ -251,9 +258,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
         #minData = collections.namedtuple('MaxAction','Value,Action')
         val = 99999
         if ( gameState.isLose() or gameState.isWin()):
-                return self.evaluationFunction( gameState )
+            return self.evaluationFunction( gameState )
         if(currentDepth==self.depth and agentIndex==(gameState.getNumAgents()-1)):
-                return self.evaluationFunction(gameState)
+            return self.evaluationFunction(gameState)
         lstActions = gameState.getLegalActions(agentIndex)
         for action in lstActions:
             successor = gameState.generateSuccessor(agentIndex, action)
@@ -262,8 +269,13 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 currentDepth+=1
                 if(currentDepth==self.depth):
                     return self.evaluationFunction(successor)
-                agentIndex=-1
-            miniMaxValue = self.getMinimaxValue(successor, agentIndex+1, currentDepth)
+                agentIndex=-1            
+            if(currentDepth==self.depth and agentIndex==(gameState.getNumAgents()-1)):
+                return self.evaluationFunction(successor)
+            if(agentIndex+1==(gameState.getNumAgents()-1)):
+                miniMaxValue = self.maxValue(successor, agentIndex+1, currentDepth)
+            else:
+                miniMaxValue = self.minValue(successor, agentIndex+1, currentDepth)
             val = min(val, miniMaxValue)
             returnVal = val
         return returnVal     
