@@ -330,8 +330,88 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           All ghosts should be modeled as choosing uniformly at random from their
           legal moves.
         """
-        "*** YOUR CODE HERE ***"
+        numAgents = gameState.getNumAgents()
+        agentIndex=0
+        maxValue = float("-inf")
+        alpha = float("-inf")
+        beta = float("inf")
+        lstActions = gameState.getLegalActions(agentIndex)
+        for action in lstActions:
+            successor = gameState.generateSuccessor(agentIndex, action)
+            if (successor.isLose() or successor.isWin()):
+                val = self.evaluationFunction(successor)
+            else:
+                val = self.expect(successor, agentIndex+1,0, alpha, beta)
+            if(val>maxValue):
+                maxValue = val
+                finalAction = action
+            if maxValue>beta:
+                return maxValue
+            alpha = max(maxValue, alpha)
+            
+        return finalAction
         util.raiseNotDefined()
+    def expect(self, gameState, agentIndex, depth, alpha, beta):
+        lstActions = gameState.getLegalActions(agentIndex)
+        expVal = 0
+        for action in lstActions:
+            successor = gameState.generateSuccessor(agentIndex, action)
+            if (successor.isLose() or successor.isWin()):
+                val = self.evaluationFunction(successor)
+            else:
+                if(agentIndex==(successor.getNumAgents()-1)):
+                    if(depth==self.depth):
+                        val = self.evaluationFunction(successor)
+                        expVal = expVal + val
+                        continue
+                        #minVal = min(val,minVal)
+                        #return minVal
+                    val = self.maximizer(successor, 0, depth+1, alpha, beta)
+                else:
+                    val = self.expect(successor, agentIndex+1,depth, alpha, beta)
+            expVal = expVal + val
+        return expVal/len(lstActions)
+        return 1
+    def minimizer(self, gameState, agentIndex, depth, alpha, beta):
+        minVal = float("inf")
+        lstActions = gameState.getLegalActions(agentIndex)
+        for action in lstActions:
+            successor = gameState.generateSuccessor(agentIndex, action)
+            if (successor.isLose() or successor.isWin()):
+                val = self.evaluationFunction(successor)
+            else:
+                if(agentIndex==(successor.getNumAgents()-1)):
+                    if(depth==self.depth):
+                        val = self.evaluationFunction(successor)
+                        minVal = min(val,minVal)
+                        if minVal<alpha:
+                            return minVal
+                        beta = min(minVal, beta)
+                        return minVal
+                    val = self.maximizer(successor, 0, depth+1, alpha, beta)
+                else:
+                    val = self.minimizer(successor, agentIndex+1,depth, alpha, beta)
+            minVal = min(val,minVal)
+            if minVal<alpha:
+                return minVal
+            beta = min(minVal, beta)
+        return minVal
+    def maximizer(self, gameState, agentIndex, depth, alpha, beta):
+        maxVal = float("-inf")
+        if(depth==self.depth):
+            return self.evaluationFunction(gameState)
+        lstActions = gameState.getLegalActions(agentIndex)
+        for action in lstActions:
+            successor = gameState.generateSuccessor(agentIndex, action)
+            if (successor.isLose() or successor.isWin()):
+                val = self.evaluationFunction(successor)
+            else:
+                val = self.expect(successor, agentIndex+1,depth, alpha, beta)
+            maxVal = max(val, maxVal)
+            if maxVal>beta:
+                return maxVal
+            alpha = max(maxVal, alpha)
+        return maxVal
 
 def betterEvaluationFunction(currentGameState):
     """
